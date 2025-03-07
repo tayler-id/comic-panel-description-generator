@@ -28,6 +28,9 @@
 - **Web Interface**: Flask application with upload form and results display
 - **Market Research**: Validated demand through X (Twitter) posts
 - **Technical Approach**: Implemented approach with Python, OpenCV, Flask, and Transformers
+- **Commercial Grade Mode**: Option for ultra-factual descriptions with no interpretation
+- **Description Verification**: MCP tool to verify descriptions and remove speculative content
+- **Feedback Processing**: MCP tool to process user feedback and learn from corrections
 
 ## What's Left to Build
 
@@ -66,6 +69,11 @@ The project is in the final development phase. We have successfully built and te
 | 2025-03-07 7:22 AM | Architecture Improvement | Implemented TextGen class with Grok API priority and smaller distilgpt2 model |
 | 2025-03-07 7:46 AM | Multi-API Integration | Implemented MultiProviderTextGen with support for multiple AI providers |
 | 2025-03-07 8:00 AM | Environment Setup | Created .env file and Docker scripts for local development with API keys |
+| 2025-03-07 8:57 AM | Vision Module Fix | Improved figure detection with better filtering and sanity checks |
+| 2025-03-07 8:58 AM | Text Generation Enhancement | Updated prompts and system instructions for more accurate descriptions |
+| 2025-03-07 11:47 AM | Commercial Grade Mode | Added "Commercial Grade" mode for ultra-factual descriptions |
+| 2025-03-07 11:49 AM | Description Verification | Added MCP tool to verify descriptions and remove speculative content |
+| 2025-03-07 11:50 AM | Feedback Processing | Added MCP tool to process user feedback and learn from corrections |
 
 ### Upcoming Milestones
 

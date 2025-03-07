@@ -11,6 +11,10 @@ graph TD
     Flask --> TextGen[Text Generation]
     ImageProc --> |Panel Analysis| TextGen
     Flask --> TempStorage[Temporary Storage]
+    Flask --> MCP[MCP Server]
+    MCP --> VerifyDesc[Description Verification]
+    MCP --> ProcessFeedback[Feedback Processing]
+    TextGen --> VerifyDesc
 ```
 
 ### Components
@@ -59,6 +63,9 @@ graph TD
 - **Improved Formatting**: Consistent "Panel X: [description]" format with better text cleaning
 - **Parameter Tuning**: Adjusted temperature and token limits for more accurate and concise descriptions
 - **Rule-Based Fallback**: More nuanced rule-based generation as ultimate fallback
+- **Commercial Grade Mode**: Option for ultra-factual descriptions with no interpretation
+- **Description Verification**: Automated verification to remove speculative content and ensure factual accuracy
+- **Feedback Processing**: System to collect, analyze, and learn from user feedback on descriptions
 
 ### Deployment Pattern
 
@@ -115,8 +122,27 @@ classDiagram
         +generate_description(image_data, panel_num)
     }
     
+    class MCPServer {
+        +verify_description(description)
+        +process_feedback(rating, issue_type, original, edited)
+    }
+    
+    class DescriptionVerifier {
+        +verify(description)
+        +remove_speculation(description)
+    }
+    
+    class FeedbackProcessor {
+        +process(feedback_data)
+        +analyze(feedback_data)
+        +store(feedback_data)
+    }
+    
     FlaskApp --> ImageProcessor
     FlaskApp --> TextGenerator
+    FlaskApp --> MCPServer
+    MCPServer --> DescriptionVerifier
+    MCPServer --> FeedbackProcessor
     TextGenerator <|-- GrokTextGenerator
     TextGenerator <|-- GPT2TextGenerator
 ```
@@ -129,6 +155,7 @@ sequenceDiagram
     participant Flask
     participant ImageProcessor
     participant TextGenerator
+    participant MCPServer
     
     User->>Flask: Upload Sketch
     Flask->>ImageProcessor: Process Image
@@ -136,23 +163,58 @@ sequenceDiagram
     ImageProcessor->>ImageProcessor: Analyze Motion
     ImageProcessor->>ImageProcessor: Identify Objects
     ImageProcessor->>Flask: Return Image Data
-    Flask->>TextGenerator: Generate Descriptions
+    
+    alt Commercial Grade Mode
+        Flask->>TextGenerator: Generate Commercial Grade Description
+    else Standard Mode
+        Flask->>TextGenerator: Generate Standard Description
+        TextGenerator->>MCPServer: Verify Description
+        MCPServer->>TextGenerator: Return Verified Description
+    end
+    
     TextGenerator->>Flask: Return Panel Descriptions
     Flask->>User: Display Results
+    
+    opt User Provides Feedback
+        User->>Flask: Submit Feedback
+        Flask->>MCPServer: Process Feedback
+        MCPServer->>MCPServer: Analyze Feedback
+        MCPServer->>MCPServer: Store Feedback
+        MCPServer->>Flask: Return Analysis
+        Flask->>User: Confirm Feedback Received
+    end
 ```
 
 ## Code Structure
 
-The application follows a simple, functional structure:
+The application follows a modular structure with clear separation of concerns:
 
 ```
 /app
   ├── app.py           # Flask application
+  ├── api_server.py    # API server for headless operation
   ├── vision.py        # OpenCV image processing
-  ├── textgen.py       # Text generation (Grok/GPT-2)
+  ├── textgen.py       # Text generation (multi-provider)
+  ├── mcp_client.py    # Client for MCP server interaction
   ├── static/          # CSS, JS, and static assets
   ├── templates/       # HTML templates
+  │   ├── base.html    # Base template with common elements
+  │   ├── index.html   # Upload form template
+  │   └── result.html  # Results display template
   └── uploads/         # Temporary storage for uploads
+
+/mcp_server
+  ├── server.py        # MCP server main entry point
+  ├── tools/           # MCP tools implementation
+  │   ├── analyze_panel.py          # Panel analysis tool
+  │   ├── classify_scene.py         # Scene classification tool
+  │   ├── detect_objects.py         # Object detection tool
+  │   ├── generate_description.py   # Description generation tool
+  │   ├── verify_description.py     # Description verification tool
+  │   └── process_feedback.py       # Feedback processing tool
+  └── utils/           # Utility functions
+      ├── image_utils.py            # Image processing utilities
+      └── api_utils.py              # API interaction utilities
 ```
 
 ## Key Implementation Details

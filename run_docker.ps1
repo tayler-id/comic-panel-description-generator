@@ -45,10 +45,11 @@ if (-not $hasUseMcp) {
 Write-Host "Running Docker container..."
 $runParams = @(
     "run",
-    "-p", "8000:8000",
-    "-p", "8001:8001"  # API server port
+    "-p", "8080:8000",  # Changed from 8000:8000 to avoid port conflict
+    "-p", "8081:8001"   # Changed from 8001:8001 to avoid port conflict
 )
 $runParams += $envParams
 $runParams += "comic-panel-description-generator"
 
+Write-Host "Container will be available at: http://localhost:8080"
 docker $runParams

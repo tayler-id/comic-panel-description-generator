@@ -28,18 +28,24 @@ An AI-powered tool that automatically converts comic sketches into textual panel
 
 The application uses multiple AI providers for text generation. Create a `.env` file in the root directory with your API keys:
 
-```
-# API Keys for Comic Panel Description Generator
-OPENAI_API_KEY=your_openai_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
-GROK_API_KEY=your_grok_api_key
-DEEPSEEK_API_KEY=your_deepseek_api_key
-GOOGLE_API_KEY=your_google_api_key
-HUGGINGFACE_API_KEY=your_huggingface_api_key
-BRAVE_API_KEY=your_brave_api_key
-```
+1. Copy the example file as a starting point:
+   ```bash
+   cp .env.example .env
+   ```
 
-The application will use these APIs in order of priority, falling back to the next one if any fails.
+2. Edit the `.env` file and uncomment the lines for the API keys you want to use:
+   ```
+   # API Keys for Comic Panel Description Generator
+   OPENAI_API_KEY=your_openai_api_key
+   ANTHROPIC_API_KEY=your_anthropic_api_key
+   GROK_API_KEY=your_grok_api_key
+   DEEPSEEK_API_KEY=your_deepseek_api_key
+   GOOGLE_API_KEY=your_google_api_key
+   HUGGINGFACE_API_KEY=your_huggingface_api_key
+   BRAVE_API_KEY=your_brave_api_key
+   ```
+
+The application will use these APIs in order of priority, falling back to the next one if any fails. You don't need to provide all API keys - the application will work with any subset of them.
 
 ### Running Locally with Docker
 
@@ -83,6 +89,53 @@ docker run -p 8000:8000 \
 Then visit http://localhost:8000 in your browser.
 
 ### Development Setup
+
+#### Option 1: Development with Docker Compose (Recommended)
+
+For a smooth development experience with hot-reloading:
+
+1. Create a `.env` file with your API keys (see above)
+
+2. Start the development environment:
+   ```bash
+   docker-compose up
+   ```
+
+3. Access the application:
+   - Web interface: http://localhost:8080
+   - API: http://localhost:8081
+
+4. Make changes to the code:
+   - Changes to Python files will automatically reload the application
+   - Changes to templates will be reflected on page refresh
+
+5. View logs in real-time:
+   ```bash
+   docker-compose logs -f
+   ```
+
+6. Rebuild if you change dependencies:
+   ```bash
+   docker-compose up --build
+   ```
+
+This setup mounts your local code directories into the container, so any changes you make to the code will be immediately reflected without having to rebuild the Docker image.
+
+7. Test hot-reloading:
+   ```bash
+   # Run the test script to see the current behavior
+   python test_hot_reload.py
+   
+   # Make a change to the code (e.g., modify app/vision.py)
+   # For example, change min_contour_area from 2000 to 3000
+   
+   # Run the test script again to see the changes
+   python test_hot_reload.py
+   ```
+
+   The example_modification.py file provides a simple example of how to modify the code and see the changes reflected without rebuilding the Docker container.
+
+#### Option 2: Local Development without Docker
 
 ```bash
 # Create virtual environment
@@ -225,10 +278,14 @@ If you prefer to set up the MCP server manually:
 ```
 /
   ├── .env             # Environment variables (API keys)
+  ├── .env.example     # Example environment variables template
+  ├── docker-compose.yml # Docker Compose for development
   ├── run_docker.sh    # Shell script to run Docker with env vars
   ├── run_docker.ps1   # PowerShell script to run Docker with env vars
   ├── add_mcp_server.sh # Shell script to add MCP server to Claude
   ├── add_mcp_server.ps1 # PowerShell script to add MCP server to Claude
+  ├── test_hot_reload.py # Script to test hot-reloading
+  ├── example_modification.py # Example of code modification for hot-reloading
   ├── requirements.txt # Python dependencies
   ├── Dockerfile       # Docker configuration
   ├── render.yaml      # Render.com deployment configuration

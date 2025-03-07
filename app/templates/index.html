@@ -29,7 +29,18 @@
             <input type="file" id="file" name="file" accept=".jpg,.jpeg,.png" required>
         </div>
         
-        <button type="submit" class="btn">Generate Description</button>
+        <div class="form-group" style="margin-top: 15px;">
+            <input type="checkbox" id="commercial_grade" name="commercial_grade">
+            <label for="commercial_grade">
+                <strong>Commercial Grade Mode</strong> - Generate ultra-factual descriptions with no interpretation
+            </label>
+            <div style="margin-left: 25px; font-size: 0.9em; color: #666;">
+                This mode produces minimal, 100% factual descriptions that only state what is objectively visible.
+                Ideal for professional use where accuracy is critical.
+            </div>
+        </div>
+        
+        <button type="submit" class="btn" style="margin-top: 15px;">Generate Description</button>
     </form>
     
     <div style="margin-top: 20px;">

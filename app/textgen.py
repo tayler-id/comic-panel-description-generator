@@ -110,10 +110,12 @@ class MultiProviderTextGen:
         # Create a more detailed prompt that focuses on accurate description
         # rather than exaggerated action
         base_prompt = (
-            f"Panel {panel_num}: Describe a comic panel showing {figure_text} in {motion_text} scene{object_text}. "
-            f"The scene is {motion_detail}. Focus on what's actually visible in the panel, "
-            f"describing the characters, their positions, and any visible text or speech bubbles. "
-            f"Keep the description concise and accurate to what would be seen in a comic panel."
+            f"Panel {panel_num}: Describe ONLY what is objectively visible in this comic panel with {figure_text} in {motion_text} scene{object_text}. "
+            f"The scene is {motion_detail}. Describe ONLY the physical elements that are definitely present: "
+            f"character positions, visible objects, and panel composition. "
+            f"If speech bubbles are present, ONLY mention their existence - DO NOT invent their contents unless text is clearly visible. "
+            f"DO NOT make assumptions about emotions, thoughts, or narrative context. "
+            f"Keep the description minimal, factual, and focused only on what can be seen."
         )
         
         return base_prompt
@@ -121,6 +123,7 @@ class MultiProviderTextGen:
     def _format_description(self, generated_text, panel_num):
         """
         Format the generated text into a consistent panel description.
+        Apply post-processing to remove speculative language and ensure factual content.
         
         Args:
             generated_text (str): Raw generated text
@@ -139,7 +142,62 @@ class MultiProviderTextGen:
         if not clean_text.startswith(f"Panel {panel_num}:"):
             clean_text = f"Panel {panel_num}: {clean_text}"
         
+        # Apply post-processing to remove speculative language
+        clean_text = self._remove_speculative_language(clean_text)
+        
         return clean_text
+    
+    def _remove_speculative_language(self, text):
+        """
+        Remove speculative language and ensure the description is factual.
+        
+        Args:
+            text (str): Description text
+            
+        Returns:
+            str: Cleaned description text
+        """
+        # List of speculative phrases to remove or replace
+        speculative_phrases = [
+            # Phrases that suggest dialogue content
+            (r'saying "[^"]*"', "with a speech bubble"),
+            (r'says "[^"]*"', "has a speech bubble"),
+            (r'reads "[^"]*"', "contains text"),
+            (r'exclaims "[^"]*"', "has a speech bubble"),
+            (r'thinking "[^"]*"', "is present"),
+            
+            # Phrases that suggest emotions or thoughts
+            (r'appears to be (feeling|thinking|considering)', "is"),
+            (r'seems to be (happy|sad|angry|excited|nervous|worried|concerned|thinking)', "is"),
+            (r'looks (happy|sad|angry|excited|nervous|worried|concerned)', "is visible"),
+            
+            # Phrases that suggest narrative context
+            (r'is about to', "is"),
+            (r'is going to', "is"),
+            (r'is trying to', "is"),
+            (r'is planning to', "is"),
+            (r'has just', "is"),
+            (r'had just', "is"),
+            
+            # Phrases that suggest interpretation
+            (r'probably', ""),
+            (r'possibly', ""),
+            (r'perhaps', ""),
+            (r'maybe', ""),
+            (r'might be', "is"),
+            (r'could be', "is"),
+            (r'would be', "is"),
+            (r'appears to be', "is"),
+            (r'seems to be', "is"),
+            (r'looks like', "shows"),
+        ]
+        
+        # Apply replacements
+        import re
+        for pattern, replacement in speculative_phrases:
+            text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+        
+        return text
     
     def _generate_with_openai(self, prompt):
         """
@@ -163,7 +221,7 @@ class MultiProviderTextGen:
             "messages": [
                 {
                     "role": "system", 
-                    "content": "You are a comic book writer who creates accurate, concise panel descriptions. Focus on describing what is actually visible in the panel, including characters, their positions, expressions, and any visible text. Avoid exaggerating action or adding elements that aren't present. Keep descriptions factual and precise."
+                    "content": "You are a comic panel describer that ONLY states what is objectively visible. NEVER invent dialogue content, emotions, or scene details. If you see a speech bubble, only mention its presence - NEVER guess what's written inside unless the text is clearly legible. Describe only physical elements that are definitely present in the image. Do not make assumptions about what characters are thinking or feeling unless their expressions are extremely clear. Do not use interpretive language - stick to physical descriptions only. Your descriptions must be factual enough to charge money for."
                 },
                 {"role": "user", "content": prompt}
             ],
@@ -420,34 +478,30 @@ class MultiProviderTextGen:
         motion = image_data.get("motion", "static")
         objects = image_data.get("objects", "none")
         
-        # Build more accurate description based on rules
+        # Build minimal, factual description based on rules
         description = f"Panel {panel_num}: "
         
-        # Character description
+        # Character description - just state the count
         if figures == 1:
-            description += "A single character"
+            description += "One character visible"
         elif figures == 2:
-            description += "Two characters"
+            description += "Two characters visible"
         else:
-            description += f"{figures} characters"
+            description += f"{figures} characters visible"
         
-        # Scene description
+        # Scene description - just state if there's motion
         if motion == "action":
-            description += " in a scene with some movement"
+            description += " in a scene with movement"
         else:
-            description += " in a calm, static scene"
+            description += " in a static scene"
         
-        # Object description - more conservative about sparks
+        # Object description - only if definitely present
         if objects == "sparks":
-            description += ", possibly with some visual effects"
+            description += " with visual effects"
         
-        # Additional context based on figure count
-        if figures == 1:
-            description += ". The character appears to be the focus of this panel."
-        elif figures == 2:
-            description += ". The characters appear to be interacting with each other."
-        else:
-            description += ". The characters appear to be part of a group scene."
+        # End with period
+        if not description.endswith("."):
+            description += "."
         
         logger.info(f"Rule-based generated: {description}")
         return description

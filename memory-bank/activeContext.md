@@ -27,6 +27,9 @@ The project is in the optimization phase after initial deployment to Render.com.
 | 2025-03-07 8:00 AM | Environment Setup | Created .env file and Docker scripts for local development with API keys |
 | 2025-03-07 8:57 AM | Vision Module Fix | Improved figure detection with better filtering and sanity checks |
 | 2025-03-07 8:58 AM | Text Generation Enhancement | Updated prompts and system instructions for more accurate descriptions |
+| 2025-03-07 11:47 AM | Commercial Grade Mode | Added "Commercial Grade" mode for ultra-factual descriptions with no interpretation |
+| 2025-03-07 11:49 AM | Description Verification | Added MCP tool to verify descriptions and remove speculative content |
+| 2025-03-07 11:50 AM | Feedback Processing | Added MCP tool to process user feedback and learn from corrections |
 
 ## Next Steps
 

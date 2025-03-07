@@ -1,0 +1,26 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8000"  # Web interface
+      - "8081:8001"  # API server
+    volumes:
+      - ./app:/app/app
+      - ./mcp_server:/app/mcp_server
+    environment:
+      - FLASK_APP=app.app
+      - FLASK_DEBUG=1
+      - PORT=8000
+      - API_PORT=8001
+      - API_BASE_URL=http://localhost:8001/api
+      # API keys will be loaded from .env file
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GROK_API_KEY=${GROK_API_KEY:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - HUGGINGFACE_API_KEY=${HUGGINGFACE_API_KEY:-}
+      - BRAVE_API_KEY=${BRAVE_API_KEY:-}
+      - MCP_SERVER_NAME=${MCP_SERVER_NAME:-comic-panel}
+      - USE_MCP=${USE_MCP:-false}
+    command: sh -c "python -m app.api_server & FLASK_DEBUG=1 flask run --host=0.0.0.0 --port=8000"

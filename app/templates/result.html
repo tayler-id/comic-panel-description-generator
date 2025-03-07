@@ -3,10 +3,10 @@
 {% block title %}Panel Description Result{% endblock %}
 
 {% block content %}
-    <h2>Generated Panel Description</h2>
+    <h2>Generated Panel Description {% if commercial_grade %}<span style="font-size: 0.7em; color: #27ae60; vertical-align: middle; margin-left: 10px; padding: 3px 8px; border-radius: 4px; background-color: #e8f8f5; border: 1px solid #27ae60;">Commercial Grade</span>{% endif %}</h2>
     
     <div class="result">
-        <div class="panel-description">
+        <div class="panel-description" id="description-text">
             {{ description }}
         </div>
         
@@ -23,6 +23,49 @@
     <div style="margin-top: 20px;">
         <button id="copyBtn" class="btn" onclick="copyToClipboard()">Copy Description</button>
         <a href="/" class="btn" style="margin-left: 10px; background-color: #7f8c8d;">Generate Another</a>
+        <button id="editBtn" class="btn" style="margin-left: 10px; background-color: #2980b9;" onclick="toggleEdit()">Edit Description</button>
+    </div>
+    
+    <div id="feedback-section" style="margin-top: 30px; display: none; background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+        <h3>Provide Feedback</h3>
+        <p>Help us improve our descriptions by providing feedback:</p>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="accuracy-rating"><strong>Accuracy Rating:</strong></label>
+            <div class="rating">
+                <input type="radio" id="star5" name="accuracy-rating" value="5" /><label for="star5">5</label>
+                <input type="radio" id="star4" name="accuracy-rating" value="4" /><label for="star4">4</label>
+                <input type="radio" id="star3" name="accuracy-rating" value="3" /><label for="star3">3</label>
+                <input type="radio" id="star2" name="accuracy-rating" value="2" /><label for="star2">2</label>
+                <input type="radio" id="star1" name="accuracy-rating" value="1" /><label for="star1">1</label>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="issue-type"><strong>Issue Type:</strong></label>
+            <select id="issue-type" class="form-control">
+                <option value="">Select an issue (if any)</option>
+                <option value="made-up-details">Made up details</option>
+                <option value="missed-elements">Missed important elements</option>
+                <option value="wrong-interpretation">Wrong interpretation</option>
+                <option value="too-verbose">Too verbose</option>
+                <option value="too-brief">Too brief</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="edited-description"><strong>Edit Description:</strong></label>
+            <textarea id="edited-description" class="form-control" rows="5">{{ description }}</textarea>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label for="additional-comments"><strong>Additional Comments:</strong></label>
+            <textarea id="additional-comments" class="form-control" rows="3" placeholder="Any other feedback..."></textarea>
+        </div>
+        
+        <button id="submitFeedbackBtn" class="btn" style="background-color: #27ae60;" onclick="submitFeedback()">Submit Feedback</button>
+        <button id="cancelFeedbackBtn" class="btn" style="margin-left: 10px; background-color: #7f8c8d;" onclick="toggleFeedback()">Cancel</button>
     </div>
     
     <div style="margin-top: 30px;">
@@ -50,5 +93,118 @@
             alert('Failed to copy to clipboard. Please select and copy the text manually.');
         });
     }
+    
+    function toggleEdit() {
+        const feedbackSection = document.getElementById('feedback-section');
+        if (feedbackSection.style.display === 'none') {
+            feedbackSection.style.display = 'block';
+            document.getElementById('editBtn').textContent = 'Cancel Edit';
+        } else {
+            feedbackSection.style.display = 'none';
+            document.getElementById('editBtn').textContent = 'Edit Description';
+        }
+    }
+    
+    function toggleFeedback() {
+        const feedbackSection = document.getElementById('feedback-section');
+        feedbackSection.style.display = 'none';
+        document.getElementById('editBtn').textContent = 'Edit Description';
+    }
+    
+    function submitFeedback() {
+        // Get form values
+        const rating = document.querySelector('input[name="accuracy-rating"]:checked')?.value || '';
+        const issueType = document.getElementById('issue-type').value;
+        const editedDescription = document.getElementById('edited-description').value;
+        const additionalComments = document.getElementById('additional-comments').value;
+        
+        // Validate form
+        if (!rating) {
+            alert('Please provide an accuracy rating.');
+            return;
+        }
+        
+        // Prepare data for submission
+        const feedbackData = {
+            rating: rating,
+            issue_type: issueType,
+            original_description: document.getElementById('description-text').innerText,
+            edited_description: editedDescription,
+            comments: additionalComments
+        };
+        
+        // Submit feedback to server
+        fetch('/api/feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(feedbackData)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Network response was not ok');
+        })
+        .then(data => {
+            // Update the description with the edited version
+            document.getElementById('description-text').innerText = editedDescription;
+            
+            // Hide feedback form
+            toggleFeedback();
+            
+            // Show success message
+            alert('Thank you for your feedback! Your edits have been saved.');
+        })
+        .catch(error => {
+            console.error('Error submitting feedback:', error);
+            
+            // Even if the API call fails, still update the description locally
+            document.getElementById('description-text').innerText = editedDescription;
+            
+            // Hide feedback form
+            toggleFeedback();
+            
+            // Show partial success message
+            alert('Your edits have been applied locally, but we could not save your feedback to our system. Please try again later.');
+        });
+    }
+    
+    // Add CSS for star rating
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            .rating {
+                display: inline-block;
+                direction: rtl;
+            }
+            
+            .rating input {
+                display: none;
+            }
+            
+            .rating label {
+                display: inline-block;
+                padding: 5px;
+                font-size: 24px;
+                color: #ddd;
+                cursor: pointer;
+            }
+            
+            .rating label:hover,
+            .rating label:hover ~ label,
+            .rating input:checked ~ label {
+                color: #f90;
+            }
+            
+            .form-control {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+        </style>
+    `);
 </script>
 {% endblock %}

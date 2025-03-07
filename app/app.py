@@ -86,13 +86,14 @@ def analyze_panel_api(image_path):
         # Return default values in case of error
         return {"figures": 1, "motion": "static", "objects": "none"}
 
-def generate_description_api(image_data, panel_num=1):
+def generate_description_api(image_data, panel_num=1, commercial_grade=False):
     """
     Call the API to generate a description for a comic panel.
     
     Args:
         image_data (dict): Analysis data
         panel_num (int): Panel number
+        commercial_grade (bool): Whether to use commercial grade mode
         
     Returns:
         str: Generated description
@@ -105,7 +106,7 @@ def generate_description_api(image_data, panel_num=1):
             # Call the API
             response = requests.post(
                 f"{API_BASE_URL}/describe",
-                json={"image_data": image_data, "panel_num": panel_num},
+                json={"image_data": image_data, "panel_num": panel_num, "commercial_grade": commercial_grade},
                 timeout=API_TIMEOUT
             )
             
@@ -184,6 +185,52 @@ def generate_rule_based_description(image_data, panel_num):
     
     return description
 
+def generate_commercial_grade_description(image_data, panel_num=1):
+    """
+    Generate a commercial-grade description that is extremely minimal and factual.
+    This mode is designed for paid descriptions that must be 100% factual.
+    
+    Args:
+        image_data (dict): Analysis data
+        panel_num (int): Panel number
+        
+    Returns:
+        str: Generated description
+    """
+    logger.info("Generating commercial-grade description")
+    
+    # Extract data from image analysis
+    figures = image_data.get("figures", 1)
+    motion = image_data.get("motion", "static")
+    objects = image_data.get("objects", "none")
+    
+    # Build minimal, factual description
+    description = f"Panel {panel_num}: "
+    
+    # Character description - just state the count
+    if figures == 1:
+        description += "One character visible"
+    elif figures == 2:
+        description += "Two characters visible"
+    else:
+        description += f"{figures} characters visible"
+    
+    # Scene description - just state if there's motion
+    if motion == "action":
+        description += " in a scene with movement"
+    else:
+        description += " in a static scene"
+    
+    # Object description - only if definitely present
+    if objects == "sparks":
+        description += " with visual effects"
+    
+    # End with period
+    if not description.endswith("."):
+        description += "."
+    
+    return description
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -200,6 +247,9 @@ def index():
             flash('No selected file')
             return redirect(request.url)
         
+        # Check if commercial grade mode is selected
+        commercial_grade = 'commercial_grade' in request.form
+        
         if file and allowed_file(file.filename):
             # Generate a unique filename to prevent collisions
             filename = str(uuid.uuid4()) + secure_filename(file.filename)
@@ -210,14 +260,19 @@ def index():
                 # Process the image using the API
                 image_data = analyze_panel_api(filepath)
                 
-                # Generate description using the API
+                # Generate description based on mode
                 panel_num = 1  # For MVP, we assume a single panel
-                description = generate_description_api(image_data, panel_num)
+                
+                # Generate description using the API with commercial grade parameter
+                description = generate_description_api(image_data, panel_num, commercial_grade)
                 
                 # Clean up the file after processing
                 os.remove(filepath)
                 
-                return render_template('result.html', description=description, image_data=image_data)
+                return render_template('result.html', 
+                                      description=description, 
+                                      image_data=image_data, 
+                                      commercial_grade=commercial_grade)
             
             except Exception as e:
                 # Clean up the file in case of error

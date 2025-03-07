@@ -7,7 +7,6 @@ import os
 import json
 import logging
 import base64
-from mcp import Client, StdioClientTransport
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -16,13 +15,26 @@ logger = logging.getLogger(__name__)
 # MCP server name
 MCP_SERVER_NAME = os.environ.get('MCP_SERVER_NAME', 'comic-panel')
 
+# Check if MCP is available
+MCP_AVAILABLE = False
+try:
+    from mcp import Client, StdioClientTransport
+    MCP_AVAILABLE = True
+    logger.info("MCP package is available")
+except ImportError:
+    logger.warning("MCP package is not available. MCP functionality will be disabled.")
+
 def get_mcp_client():
     """
     Get an MCP client instance.
     
     Returns:
-        mcp.Client: MCP client instance
+        mcp.Client: MCP client instance or None if MCP is not available
     """
+    if not MCP_AVAILABLE:
+        logger.warning("MCP is not available. Cannot create MCP client.")
+        return None
+        
     try:
         # Create a client
         client = Client()
@@ -34,7 +46,7 @@ def get_mcp_client():
         return client
     except Exception as e:
         logger.error(f"Error creating MCP client: {str(e)}")
-        raise
+        return None
 
 def analyze_panel_with_mcp(image_path):
     """
@@ -49,6 +61,11 @@ def analyze_panel_with_mcp(image_path):
     try:
         # Get MCP client
         client = get_mcp_client()
+        
+        # If MCP is not available, return default values
+        if client is None:
+            logger.warning("MCP is not available. Using default values for panel analysis.")
+            return {"figures": 1, "motion": "static", "objects": "none"}
         
         # Call the analyze_panel tool
         result = client.call_tool(
@@ -104,6 +121,11 @@ def generate_description_with_mcp(image_data, panel_num=1):
         # Get MCP client
         client = get_mcp_client()
         
+        # If MCP is not available, use rule-based description
+        if client is None:
+            logger.warning("MCP is not available. Using rule-based description generation.")
+            return generate_rule_based_description(image_data, panel_num)
+        
         # Convert the image_data to the format expected by the MCP server
         figures = []
         for i in range(image_data.get("figures", 1)):
@@ -138,6 +160,90 @@ def generate_description_with_mcp(image_data, panel_num=1):
         logger.error(f"Error in generate_description_with_mcp: {str(e)}")
         return generate_rule_based_description(image_data, panel_num)
 
+def process_feedback_with_mcp(rating, issue_type, original_description, edited_description, comments=""):
+    """
+    Process feedback from artists using the MCP server.
+    
+    Args:
+        rating (str): Rating (1-5)
+        issue_type (str): Type of issue (made-up-details, missed-elements, etc.)
+        original_description (str): Original description
+        edited_description (str): Edited description
+        comments (str, optional): Additional comments
+        
+    Returns:
+        dict: Processing results
+    """
+    try:
+        # Get MCP client
+        client = get_mcp_client()
+        
+        # If MCP is not available, return a default response
+        if client is None:
+            logger.warning("MCP is not available. Cannot process feedback.")
+            return {"success": True, "message": "Feedback saved locally (MCP server not available)"}
+        
+        # Call the process_feedback tool
+        result = client.call_tool(
+            MCP_SERVER_NAME,
+            "process_feedback",
+            {
+                "rating": rating,
+                "issue_type": issue_type,
+                "original_description": original_description,
+                "edited_description": edited_description,
+                "comments": comments
+            }
+        )
+        
+        # Parse the result
+        if result and result.content and len(result.content) > 0:
+            return json.loads(result.content[0].text)
+        else:
+            logger.error("Empty or invalid result from MCP server")
+            return {"success": False, "message": "Failed to process feedback"}
+    except Exception as e:
+        logger.error(f"Error in process_feedback_with_mcp: {str(e)}")
+        return {"success": False, "message": f"Error: {str(e)}"}
+
+def verify_description_with_mcp(description):
+    """
+    Verify a description using the MCP server to ensure it's factual.
+    
+    Args:
+        description (str): Description to verify
+        
+    Returns:
+        str: Verified description
+    """
+    try:
+        # Get MCP client
+        client = get_mcp_client()
+        
+        # If MCP is not available, return the original description
+        if client is None:
+            logger.warning("MCP is not available. Cannot verify description.")
+            return description
+        
+        # Call the verify_description tool
+        result = client.call_tool(
+            MCP_SERVER_NAME,
+            "verify_description",
+            {
+                "description": description
+            }
+        )
+        
+        # Parse the result
+        if result and result.content and len(result.content) > 0:
+            return result.content[0].text
+        else:
+            logger.error("Empty or invalid result from MCP server")
+            return description
+    except Exception as e:
+        logger.error(f"Error in verify_description_with_mcp: {str(e)}")
+        return description
+
 def generate_rule_based_description(image_data, panel_num):
     """
     Generate a rule-based description as a fallback.
@@ -156,33 +262,29 @@ def generate_rule_based_description(image_data, panel_num):
     motion = image_data.get("motion", "static")
     objects = image_data.get("objects", "none")
     
-    # Build description
+    # Build minimal, factual description based on rules
     description = f"Panel {panel_num}: "
     
-    # Character description
+    # Character description - just state the count
     if figures == 1:
-        description += "A single character"
+        description += "One character visible"
     elif figures == 2:
-        description += "Two characters"
+        description += "Two characters visible"
     else:
-        description += f"{figures} characters"
+        description += f"{figures} characters visible"
     
-    # Scene description
+    # Scene description - just state if there's motion
     if motion == "action":
         description += " in a scene with movement"
     else:
-        description += " in a calm, static scene"
+        description += " in a static scene"
     
-    # Object description
+    # Object description - only if definitely present
     if objects == "sparks":
-        description += " with visual effects like sparks or impact lines"
+        description += " with visual effects"
     
-    # Additional context based on figure count
-    if figures == 1:
-        description += ". The character appears to be the focus of this panel."
-    elif figures == 2:
-        description += ". The characters appear to be interacting with each other."
-    else:
-        description += ". The characters appear to be part of a group scene."
+    # End with period
+    if not description.endswith("."):
+        description += "."
     
     return description

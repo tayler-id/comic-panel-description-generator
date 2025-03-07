@@ -1,4 +1,4 @@
-#!/bin/bash
+i#!/bin/bash
 
 # Shell script to add the Comic Panel MCP server to Claude's MCP settings
 

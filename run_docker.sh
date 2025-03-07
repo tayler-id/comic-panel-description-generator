@@ -26,7 +26,7 @@ fi
 
 # Run the Docker container with environment variables
 echo "Running Docker container..."
-docker run -p 8000:8000 -p 8001:8001 \
+docker run -p 8080:8000 -p 8081:8001 \
     -e OPENAI_API_KEY="$OPENAI_API_KEY" \
     -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
     -e GROK_API_KEY="$GROK_API_KEY" \
@@ -37,6 +37,8 @@ docker run -p 8000:8000 -p 8001:8001 \
     -e MCP_SERVER_NAME="$MCP_SERVER_NAME" \
     -e USE_MCP="$USE_MCP" \
     comic-panel-description-generator
+
+echo "Container will be available at: http://localhost:8080"
 
 # Unset environment variables
 unset OPENAI_API_KEY ANTHROPIC_API_KEY GROK_API_KEY DEEPSEEK_API_KEY GOOGLE_API_KEY HUGGINGFACE_API_KEY BRAVE_API_KEY MCP_SERVER_NAME USE_MCP

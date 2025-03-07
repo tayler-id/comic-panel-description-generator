@@ -236,17 +236,22 @@ class MultiProviderAPI:
         object_text = " with visual effects like sparks or impact lines" if object_type == "sparks" else ""
         
         prompt = (
-            f"Panel {panel_num}: Describe a comic panel showing {figure_text} in {motion_text} scene{object_text}. "
-            f"The scene is {motion_detail}. Focus on what's actually visible in the panel, "
-            f"describing the characters, their positions, and any visible text or speech bubbles. "
-            f"Keep the description concise and accurate to what would be seen in a comic panel."
+            f"Panel {panel_num}: Describe ONLY what is objectively visible in this comic panel with {figure_text} in {motion_text} scene{object_text}. "
+            f"The scene is {motion_detail}. Describe ONLY the physical elements that are definitely present: "
+            f"character positions, visible objects, and panel composition. "
+            f"If speech bubbles are present, ONLY mention their existence - DO NOT invent their contents unless text is clearly visible. "
+            f"DO NOT make assumptions about emotions, thoughts, or narrative context. "
+            f"Keep the description minimal, factual, and focused only on what can be seen."
         )
         
         system_prompt = (
-            "You are a comic book writer who creates accurate, concise panel descriptions. "
-            "Focus on describing what is actually visible in the panel, including characters, "
-            "their positions, expressions, and any visible text. Avoid exaggerating action or "
-            "adding elements that aren't present. Keep descriptions factual and precise."
+            "You are a comic panel describer that ONLY states what is objectively visible. "
+            "NEVER invent dialogue content, emotions, or scene details. If you see a speech bubble, "
+            "only mention its presence - NEVER guess what's written inside unless the text is clearly legible. "
+            "Describe only physical elements that are definitely present in the image. "
+            "Do not make assumptions about what characters are thinking or feeling unless their expressions are extremely clear. "
+            "Do not use interpretive language - stick to physical descriptions only. "
+            "Your descriptions must be factual enough to charge money for."
         )
         
         # Try each provider in priority order
@@ -299,34 +304,30 @@ class MultiProviderAPI:
         motion_type = image_analysis.get("motion", {}).get("type", "static")
         object_type = image_analysis.get("objects", {}).get("type", "none")
         
-        # Build description
+        # Build minimal, factual description based on rules
         description = f"Panel {panel_num}: "
         
-        # Character description
+        # Character description - just state the count
         if figures == 1:
-            description += "A single character"
+            description += "One character visible"
         elif figures == 2:
-            description += "Two characters"
+            description += "Two characters visible"
         else:
-            description += f"{figures} characters"
+            description += f"{figures} characters visible"
         
-        # Scene description
+        # Scene description - just state if there's motion
         if motion_type == "action":
             description += " in a scene with movement"
         else:
-            description += " in a calm, static scene"
+            description += " in a static scene"
         
-        # Object description
+        # Object description - only if definitely present
         if object_type == "sparks":
-            description += " with visual effects like sparks or impact lines"
+            description += " with visual effects"
         
-        # Additional context based on figure count
-        if figures == 1:
-            description += ". The character appears to be the focus of this panel."
-        elif figures == 2:
-            description += ". The characters appear to be interacting with each other."
-        else:
-            description += ". The characters appear to be part of a group scene."
+        # End with period
+        if not description.endswith("."):
+            description += "."
         
         return description
 

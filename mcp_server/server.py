@@ -14,7 +14,9 @@ from .tools import (
     classify_scene_tool,
     analyze_relationships_tool,
     generate_description_tool,
-    analyze_panel_tool
+    analyze_panel_tool,
+    verify_description_tool,
+    process_feedback_tool
 )
 
 # Configure logging
@@ -181,6 +183,50 @@ class ComicPanelMcpServer:
                         },
                         "required": ["image_data"]
                     }
+                },
+                {
+                    "name": "verify_description",
+                    "description": "Verify a description to ensure it's factual and doesn't contain speculative content",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "description": {
+                                "type": "string",
+                                "description": "Description to verify"
+                            }
+                        },
+                        "required": ["description"]
+                    }
+                },
+                {
+                    "name": "process_feedback",
+                    "description": "Process feedback from artists to improve description generation",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "rating": {
+                                "type": "string",
+                                "description": "Rating (1-5)"
+                            },
+                            "issue_type": {
+                                "type": "string",
+                                "description": "Type of issue (made-up-details, missed-elements, etc.)"
+                            },
+                            "original_description": {
+                                "type": "string",
+                                "description": "Original description"
+                            },
+                            "edited_description": {
+                                "type": "string",
+                                "description": "Edited description"
+                            },
+                            "comments": {
+                                "type": "string",
+                                "description": "Additional comments"
+                            }
+                        },
+                        "required": ["rating", "original_description", "edited_description"]
+                    }
                 }
             ]
         }
@@ -203,6 +249,10 @@ class ComicPanelMcpServer:
                 return await generate_description_tool(arguments, self.openai_key)
             elif tool_name == "analyze_panel":
                 return await analyze_panel_tool(arguments, self.openai_key)
+            elif tool_name == "verify_description":
+                return await verify_description_tool(arguments, self.openai_key)
+            elif tool_name == "process_feedback":
+                return await process_feedback_tool(arguments, self.openai_key)
             else:
                 raise McpError(ErrorCode.MethodNotFound, f"Unknown tool: {tool_name}")
         except Exception as e:

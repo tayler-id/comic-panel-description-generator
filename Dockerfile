@@ -14,8 +14,10 @@ COPY requirements.txt .
 COPY mcp_server/requirements.txt ./mcp_requirements.txt
 
 # Install Python dependencies
+# Note: We've commented out the mcp package in requirements.txt and mcp_requirements.txt
+# as it's not available on PyPI and is only needed for Claude integration
 RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -r mcp_requirements.txt
+    pip install --no-cache-dir -r mcp_requirements.txt || echo "Warning: Some MCP dependencies could not be installed. MCP server functionality will be disabled."
 
 # Copy application code
 COPY app/ ./app/
