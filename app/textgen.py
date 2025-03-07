@@ -11,16 +11,22 @@ logger = logging.getLogger(__name__)
 USE_GROK_API = os.environ.get('USE_GROK_API', 'false').lower() == 'true'
 GROK_API_KEY = os.environ.get('GROK_API_KEY', '')
 
-# Initialize GPT-2 model (lazy loading - will only load when needed)
-_generator = None
+# Initialize GPT-2 model (pre-loaded to avoid timeout issues)
+logger.info("Pre-loading GPT-2 model during initialization")
+try:
+    _generator = pipeline("text-generation", model="gpt2", device=-1)
+    logger.info("GPT-2 model initialized successfully")
+except Exception as e:
+    logger.error(f"Error initializing GPT-2 model: {str(e)}")
+    _generator = None
 
 def get_generator():
     """
-    Lazy-load the GPT-2 model to avoid loading it if Grok API is used
+    Return the pre-loaded GPT-2 model or attempt to load it if not available
     """
     global _generator
     if _generator is None:
-        logger.info("Initializing GPT-2 model for text generation")
+        logger.info("Attempting to initialize GPT-2 model")
         try:
             _generator = pipeline("text-generation", model="gpt2", device=-1)
             logger.info("GPT-2 model initialized successfully")
@@ -77,7 +83,16 @@ def generate_with_gpt2(prompt):
     """
     try:
         logger.info(f"Generating text with GPT-2. Prompt: {prompt}")
-        generator = get_generator()
+        
+        # If model failed to pre-load, try again or use fallback
+        if _generator is None:
+            try:
+                generator = get_generator()
+            except Exception:
+                logger.error("Failed to load GPT-2 model, using fallback description")
+                return "A comic panel with characters in action."
+        else:
+            generator = _generator
         
         result = generator(
             prompt,

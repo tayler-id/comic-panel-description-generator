@@ -9,7 +9,7 @@
 | Image Processing | Complete | 100% | OpenCV implementation working as expected |
 | Text Generation | Complete | 100% | GPT-2 model generating descriptions |
 | Web Interface | Complete | 100% | Flask app with upload and results display |
-| Deployment | In Progress | 75% | render.yaml configured, deployment to Render.com pending |
+| Deployment | In Progress | 85% | Fixed worker timeout issue, redeployment pending |
 | Marketing | Not Started | 0% | Planned for post-deployment |
 
 ## What Works
@@ -62,6 +62,7 @@ The project is in the final development phase. We have successfully built and te
 | 2025-03-06 11:32 PM | Application Testing | Successfully tested image processing and text generation |
 | 2025-03-07 12:11 AM | Text Generation Optimization | Improved GPT-2 output quality with enhanced prompts |
 | 2025-03-07 12:30 AM | Render.yaml Configuration | Created and configured render.yaml for deployment |
+| 2025-03-07 7:10 AM | Deployment Fix | Modified application to pre-load GPT-2 model and increased Gunicorn timeout |
 
 ### Upcoming Milestones
 
@@ -76,6 +77,7 @@ The project is in the final development phase. We have successfully built and te
 - **Text Generation Quality**: The GPT-2 model sometimes generates unusual descriptions (e.g., file paths instead of proper descriptions)
 - **Image Processing Accuracy**: Comic sketches vary widely in style and quality
 - **Docker Image Size**: The Docker image is quite large (3.43GB) due to ML dependencies
+- **Worker Timeout**: Fixed by pre-loading the model and increasing Gunicorn timeout
 
 ## Blockers
 

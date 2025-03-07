@@ -34,5 +34,5 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Expose the port the app runs on
 EXPOSE 8000
 
-# Command to run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+# Command to run the application with increased timeout
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "300", "app:app"]
