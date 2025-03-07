@@ -2,6 +2,10 @@ import os
 import uuid
 from flask import Flask, request, render_template, redirect, url_for, flash
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from vision import analyze_panel
 from textgen import generate_description

@@ -29,7 +29,15 @@ USER appuser
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PORT=8000
+    PORT=8000 \
+    # Default to empty values for API keys, will be overridden at runtime
+    OPENAI_API_KEY="" \
+    ANTHROPIC_API_KEY="" \
+    GROK_API_KEY="" \
+    DEEPSEEK_API_KEY="" \
+    GOOGLE_API_KEY="" \
+    HUGGINGFACE_API_KEY="" \
+    BRAVE_API_KEY=""
 
 # Expose the port the app runs on
 EXPOSE 8000
