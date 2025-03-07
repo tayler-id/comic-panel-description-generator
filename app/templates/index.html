@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Comic Panel Description Generator{% endblock %}
+
+{% block content %}
+    <h2>Upload Comic Sketch</h2>
+    
+    {% if error %}
+    <div class="alert">
+        {{ error }}
+    </div>
+    {% endif %}
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <p>Upload your comic sketch to generate a panel description:</p>
+    
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file">Select Image (JPG, PNG):</label>
+            <input type="file" id="file" name="file" accept=".jpg,.jpeg,.png" required>
+        </div>
+        
+        <button type="submit" class="btn">Generate Description</button>
+    </form>
+    
+    <div style="margin-top: 20px;">
+        <h3>How it works:</h3>
+        <ol>
+            <li>Upload your comic sketch (JPG or PNG format)</li>
+            <li>Our AI analyzes the image to detect figures, motion, and objects</li>
+            <li>The system generates a descriptive text for your panel</li>
+            <li>Use the description in your comic scripting workflow</li>
+        </ol>
+        
+        <p><strong>Note:</strong> For best results, upload clear sketches with defined lines. The system works with both simple and detailed drawings.</p>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Simple client-side validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const fileInput = document.getElementById('file');
+        if (!fileInput.files.length) {
+            e.preventDefault();
+            alert('Please select a file to upload');
+            return;
+        }
+        
+        const file = fileInput.files[0];
+        const fileSize = file.size / 1024 / 1024; // in MB
+        if (fileSize > 16) {
+            e.preventDefault();
+            alert('File size exceeds 16MB limit. Please select a smaller file.');
+            return;
+        }
+        
+        // Show loading state
+        document.querySelector('.btn').textContent = 'Processing...';
+        document.querySelector('.btn').disabled = true;
+    });
+</script>
+{% endblock %}

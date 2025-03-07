@@ -1,0 +1,159 @@
+# Comic Panel Description Generator - Project Rules
+
+## Docker Best Practices
+
+1. **Base Image**
+   - Use python:3.9-slim as the base image
+   - Install only necessary dependencies
+   - Clean up apt caches in the same layer as installation
+   - Keep the image as lean as possible for fast deployment
+
+2. **Dockerfile Structure**
+   - Order instructions by change frequency (least frequent first)
+   - Group related commands in single RUN instructions
+   - Use COPY for adding files to the container
+   - Set appropriate working directory and permissions
+
+3. **Container Security**
+   - Run container as non-root user when possible
+   - Don't include sensitive information in the image
+   - Use environment variables for configuration
+   - Implement basic security headers in Flask
+
+4. **Temporary Storage**
+   - Use ephemeral storage for uploaded files
+   - Clean up temporary files after processing
+   - Implement file size limits for uploads
+   - Use secure file handling practices
+
+5. **Networking**
+   - Expose only the necessary port (8000)
+   - Use environment variables for configuration
+   - Implement proper CORS settings
+   - Use HTTPS in production (via Render.com)
+
+## Development Workflow
+
+1. **Local Development**
+   - Use Docker for consistent development environment
+   - Test locally before deployment
+   - Implement fast feedback loops
+   - Focus on core functionality first
+
+2. **Testing**
+   - Prioritize manual testing due to time constraints
+   - Test with various comic sketch styles
+   - Verify text generation quality
+   - Ensure error handling works properly
+
+3. **Code Organization**
+   - Follow modular architecture principles
+   - Separate concerns between components
+   - Use clear function and variable names
+   - Include minimal but sufficient comments
+
+4. **Version Control**
+   - Commit frequently with descriptive messages
+   - Use feature branches if collaborating
+   - Tag releases with semantic versioning
+   - Include deployment instructions in README
+
+## Comic Panel Processing Patterns
+
+1. **Image Processing**
+   - Use cv2.Canny for edge detection (comics are line-heavy)
+   - Implement contour analysis for figure detection
+   - Use edge density for motion detection
+   - Accept "rough detection" as sufficient for MVP
+
+2. **Text Generation**
+   - Implement dual approach (Grok API and GPT-2)
+   - Use consistent "Panel X: [description]" format
+   - Keep descriptions concise and useful
+   - Balance quality with generation speed
+
+3. **User Experience**
+   - Create simple, intuitive upload interface
+   - Provide clear feedback during processing
+   - Display results in an easy-to-read format
+   - Focus on speed and utility over aesthetics
+
+4. **Error Handling**
+   - Implement graceful error handling
+   - Provide clear error messages
+   - Fallback strategies for processing failures
+   - Log errors for debugging
+
+## Environment Configuration
+
+1. **Configuration Management**
+   - Use environment variables for configuration
+   - Provide sensible defaults for development
+   - Document all configuration options
+   - Validate configuration at startup
+
+2. **Secrets Management**
+   - Never store API keys in the repository
+   - Use environment variables for secrets
+   - Use Render.com environment variables for deployment
+   - Implement proper error handling for missing credentials
+
+3. **Logging**
+   - Implement basic logging for key operations
+   - Log errors and exceptions
+   - Include timestamp and context in logs
+   - Balance logging detail with performance
+
+4. **Deployment**
+   - Deploy to Render.com free tier
+   - Use Docker-based deployment
+   - Configure environment variables in Render.com
+   - Implement basic monitoring
+
+## Project-Specific Conventions
+
+1. **Naming Conventions**
+   - Files: lowercase with underscores (snake_case)
+   - Functions: lowercase with underscores
+   - Classes: CamelCase
+   - Constants: UPPERCASE_WITH_UNDERSCORES
+   - Environment variables: COMIC_PANEL_{VARIABLE}
+
+2. **Documentation**
+   - Keep memory-bank up to date with all changes
+   - Include clear README with setup and usage instructions
+   - Document key functions and components
+   - Include deployment instructions
+
+3. **Performance Considerations**
+   - Optimize Docker image size and build time
+   - Implement efficient image processing
+   - Balance text generation quality with speed
+   - Minimize dependencies to essential packages
+
+4. **Marketing Approach**
+   - Direct, straightforward messaging on X (Twitter)
+   - Target comic artist communities on Discord
+   - Emphasize time savings and creative benefits
+   - Offer both subscription ($20/month) and one-time purchase ($50)
+
+## Time Management
+
+1. **Development Phases**
+   - Docker Environment: 45 minutes
+   - Image Processing: 1 hour
+   - Text Generation: 1 hour
+   - Web Interface: 1.5 hours
+   - Deployment: 45 minutes
+
+2. **Prioritization**
+   - Focus on core functionality first
+   - Implement "good enough" solutions
+   - Skip non-essential features
+   - Aim for working product over perfect code
+
+3. **Debugging Approach**
+   - Quick fixes over perfect solutions
+   - Log key information for troubleshooting
+   - Test critical paths thoroughly
+   - Have fallback strategies for problematic components

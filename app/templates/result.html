@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Panel Description Result{% endblock %}
+
+{% block content %}
+    <h2>Generated Panel Description</h2>
+    
+    <div class="result">
+        <div class="panel-description">
+            {{ description }}
+        </div>
+        
+        <div class="panel-details">
+            <p><strong>Analysis Details:</strong></p>
+            <ul>
+                <li>Figures detected: {{ image_data.figures }}</li>
+                <li>Motion type: {{ image_data.motion }}</li>
+                <li>Special objects: {{ image_data.objects }}</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <button id="copyBtn" class="btn" onclick="copyToClipboard()">Copy Description</button>
+        <a href="/" class="btn" style="margin-left: 10px; background-color: #7f8c8d;">Generate Another</a>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <h3>Pricing Options:</h3>
+        <ul>
+            <li><strong>Monthly Subscription:</strong> $20/month for unlimited descriptions</li>
+            <li><strong>One-time Purchase:</strong> $50 for perpetual access</li>
+        </ul>
+        <p>Contact us at <a href="mailto:contact@comicpaneldescription.com">contact@comicpaneldescription.com</a> to purchase.</p>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function copyToClipboard() {
+        const description = document.querySelector('.panel-description').innerText;
+        navigator.clipboard.writeText(description).then(function() {
+            const copyBtn = document.getElementById('copyBtn');
+            copyBtn.textContent = 'Copied!';
+            setTimeout(function() {
+                copyBtn.textContent = 'Copy Description';
+            }, 2000);
+        }, function(err) {
+            console.error('Could not copy text: ', err);
+            alert('Failed to copy to clipboard. Please select and copy the text manually.');
+        });
+    }
+</script>
+{% endblock %}

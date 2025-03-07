@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: comic-panel-description-generator
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: USE_GROK_API
+        value: "false"
+      - key: GROK_API_KEY
+        sync: false
