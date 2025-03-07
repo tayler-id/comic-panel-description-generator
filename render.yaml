@@ -9,6 +9,14 @@ services:
         value: production
       - key: FLASK_SECRET_KEY
         generateValue: true
+      # API configuration
+      - key: API_BASE_URL
+        value: https://comic-panel-api.onrender.com/api
+      # MCP configuration
+      - key: MCP_SERVER_NAME
+        value: comic-panel
+      - key: USE_MCP
+        value: "false"
       # API Keys for text generation - set these in the Render.com dashboard
       - key: OPENAI_API_KEY
         sync: false
@@ -24,3 +32,36 @@ services:
         sync: false
       - key: BRAVE_API_KEY
         sync: false
+
+  - type: web
+    name: comic-panel-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: API_PORT
+        value: 8001
+      # MCP configuration
+      - key: MCP_SERVER_NAME
+        value: comic-panel
+      - key: USE_MCP
+        value: "false"
+      # API Keys for text generation - set these in the Render.com dashboard
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GROK_API_KEY
+        sync: false
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: HUGGINGFACE_API_KEY
+        sync: false
+      - key: BRAVE_API_KEY
+        sync: false
+    # Override the Docker command to run only the API server
+    dockerCommand: python -m app.api_server

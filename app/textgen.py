@@ -90,13 +90,33 @@ class MultiProviderTextGen:
         motion = image_data.get("motion", "static")
         objects = image_data.get("objects", "none")
         
-        # Create a prompt based on the image data
+        # Create a more descriptive and accurate prompt based on the image data
         figure_text = f"{figures} character{'s' if figures > 1 else ''}"
-        motion_text = "an action-packed" if motion == "action" else "a static"
-        object_text = " with sparks flying" if objects == "sparks" else ""
         
-        # Base prompt
-        return f"Panel {panel_num}: {figure_text} in {motion_text} scene{object_text}—comic style, short and wild!"
+        # More nuanced description of motion
+        if motion == "action":
+            motion_text = "a dynamic"
+            motion_detail = "showing movement and energy"
+        else:
+            motion_text = "a calm"
+            motion_detail = "with minimal movement"
+        
+        # More specific object description
+        if objects == "sparks":
+            object_text = " with visual effects like sparks or impact lines"
+        else:
+            object_text = ""
+        
+        # Create a more detailed prompt that focuses on accurate description
+        # rather than exaggerated action
+        base_prompt = (
+            f"Panel {panel_num}: Describe a comic panel showing {figure_text} in {motion_text} scene{object_text}. "
+            f"The scene is {motion_detail}. Focus on what's actually visible in the panel, "
+            f"describing the characters, their positions, and any visible text or speech bubbles. "
+            f"Keep the description concise and accurate to what would be seen in a comic panel."
+        )
+        
+        return base_prompt
     
     def _format_description(self, generated_text, panel_num):
         """
@@ -141,11 +161,14 @@ class MultiProviderTextGen:
         payload = {
             "model": "gpt-3.5-turbo",
             "messages": [
-                {"role": "system", "content": "You are a comic book writer who creates concise, vivid panel descriptions."},
+                {
+                    "role": "system", 
+                    "content": "You are a comic book writer who creates accurate, concise panel descriptions. Focus on describing what is actually visible in the panel, including characters, their positions, expressions, and any visible text. Avoid exaggerating action or adding elements that aren't present. Keep descriptions factual and precise."
+                },
                 {"role": "user", "content": prompt}
             ],
-            "max_tokens": 50,
-            "temperature": 0.7
+            "max_tokens": 100,
+            "temperature": 0.5
         }
         
         response = requests.post(
@@ -397,20 +420,34 @@ class MultiProviderTextGen:
         motion = image_data.get("motion", "static")
         objects = image_data.get("objects", "none")
         
-        # Build description based on rules
-        description = f"Panel {panel_num}: {figures} character"
-        if figures > 1:
-            description += "s"
+        # Build more accurate description based on rules
+        description = f"Panel {panel_num}: "
         
-        description += f" in a {motion} scene"
-        
-        if objects == "sparks":
-            description += " with sparks flying around"
-        
-        if motion == "action":
-            description += ". There's intense movement and energy in this panel."
+        # Character description
+        if figures == 1:
+            description += "A single character"
+        elif figures == 2:
+            description += "Two characters"
         else:
-            description += ". The scene is calm and still."
+            description += f"{figures} characters"
+        
+        # Scene description
+        if motion == "action":
+            description += " in a scene with some movement"
+        else:
+            description += " in a calm, static scene"
+        
+        # Object description - more conservative about sparks
+        if objects == "sparks":
+            description += ", possibly with some visual effects"
+        
+        # Additional context based on figure count
+        if figures == 1:
+            description += ". The character appears to be the focus of this panel."
+        elif figures == 2:
+            description += ". The characters appear to be interacting with each other."
+        else:
+            description += ". The characters appear to be part of a group scene."
         
         logger.info(f"Rule-based generated: {description}")
         return description

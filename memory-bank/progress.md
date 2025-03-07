@@ -6,8 +6,8 @@
 |-----------|--------|----------|-------|
 | Project Documentation | Complete | 100% | Updated for Comic Panel Description Generator |
 | Docker Configuration | Complete | 100% | Docker container built and running successfully |
-| Image Processing | Complete | 100% | OpenCV implementation working as expected |
-| Text Generation | Complete | 100% | Multi-API approach with priority chain and fallbacks |
+| Image Processing | Updated | 100% | Fixed figure detection and motion classification issues |
+| Text Generation | Updated | 100% | Improved prompts and system instructions for accuracy |
 | Web Interface | Complete | 100% | Flask app with upload and results display |
 | Deployment | In Progress | 98% | Implemented comprehensive API solution, redeployment pending |
 | Marketing | Not Started | 0% | Planned for post-deployment |

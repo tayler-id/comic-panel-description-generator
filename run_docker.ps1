@@ -28,11 +28,25 @@ foreach ($var in $envVars) {
     }
 }
 
+# Add MCP configuration if not already in .env
+$hasMcpServerName = $envVars | Where-Object { $_.Key -eq "MCP_SERVER_NAME" }
+if (-not $hasMcpServerName) {
+    $envParams += "-e"
+    $envParams += "MCP_SERVER_NAME=comic-panel"
+}
+
+$hasUseMcp = $envVars | Where-Object { $_.Key -eq "USE_MCP" }
+if (-not $hasUseMcp) {
+    $envParams += "-e"
+    $envParams += "USE_MCP=false"
+}
+
 # Run the Docker container with environment variables
 Write-Host "Running Docker container..."
 $runParams = @(
     "run",
-    "-p", "8000:8000"
+    "-p", "8000:8000",
+    "-p", "8001:8001"  # API server port
 )
 $runParams += $envParams
 $runParams += "comic-panel-description-generator"

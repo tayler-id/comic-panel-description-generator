@@ -11,16 +11,19 @@ RUN apt-get update && \
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
+COPY mcp_server/requirements.txt ./mcp_requirements.txt
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -r mcp_requirements.txt
 
 # Copy application code
-COPY app/ .
+COPY app/ ./app/
+COPY mcp_server/ ./mcp_server/
 
 # Create uploads directory
-RUN mkdir -p uploads && \
-    chmod 777 uploads
+RUN mkdir -p app/uploads && \
+    chmod 777 app/uploads
 
 # Run as non-root user for better security
 RUN useradd -m appuser
@@ -30,6 +33,10 @@ USER appuser
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=8000 \
+    API_PORT=8001 \
+    # MCP configuration
+    MCP_SERVER_NAME="comic-panel" \
+    USE_MCP="false" \
     # Default to empty values for API keys, will be overridden at runtime
     OPENAI_API_KEY="" \
     ANTHROPIC_API_KEY="" \
@@ -39,8 +46,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     HUGGINGFACE_API_KEY="" \
     BRAVE_API_KEY=""
 
-# Expose the port the app runs on
+# Expose the ports
 EXPOSE 8000
+EXPOSE 8001
 
 # Command to run the application with increased timeout
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "60", "app:app"]
+# We use a shell to allow for environment variable expansion
+CMD ["sh", "-c", "python -m app.api_server & gunicorn --bind 0.0.0.0:${PORT} --timeout 60 --pythonpath app app:app"]
