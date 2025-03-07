@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comic Sketch Creator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid #000;
+            margin: 10px auto;
+            display: block;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+        button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Comic Sketch Creator</h1>
+    <p>Draw a simple comic sketch below, then save it to test the Comic Panel Description Generator</p>
+    
+    <div class="controls">
+        <button id="clearBtn">Clear Canvas</button>
+        <button id="saveBtn">Save Sketch</button>
+    </div>
+    
+    <canvas id="sketchCanvas" width="600" height="400"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('sketchCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        
+        // Set initial canvas to white background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Set up drawing style
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = 'black';
+        
+        // Drawing functions
+        function startDrawing(e) {
+            isDrawing = true;
+            draw(e);
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+        
+        // Event listeners for drawing
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        // Clear canvas
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+        
+        // Save sketch
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            // Create a temporary link
+            const link = document.createElement('a');
+            link.download = 'comic_sketch.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+        
+        // Draw a simple stick figure as an example
+        function drawExample() {
+            // Head
+            ctx.beginPath();
+            ctx.arc(300, 100, 30, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Body
+            ctx.beginPath();
+            ctx.moveTo(300, 130);
+            ctx.lineTo(300, 250);
+            ctx.stroke();
+            
+            // Arms
+            ctx.beginPath();
+            ctx.moveTo(300, 170);
+            ctx.lineTo(250, 200);
+            ctx.moveTo(300, 170);
+            ctx.lineTo(350, 200);
+            ctx.stroke();
+            
+            // Legs
+            ctx.beginPath();
+            ctx.moveTo(300, 250);
+            ctx.lineTo(270, 320);
+            ctx.moveTo(300, 250);
+            ctx.lineTo(330, 320);
+            ctx.stroke();
+            
+            // Face
+            ctx.beginPath();
+            ctx.arc(290, 95, 5, 0, Math.PI * 2); // Left eye
+            ctx.arc(310, 95, 5, 0, Math.PI * 2); // Right eye
+            ctx.stroke();
+            
+            // Smile
+            ctx.beginPath();
+            ctx.arc(300, 110, 10, 0, Math.PI);
+            ctx.stroke();
+        }
+        
+        // Draw example stick figure
+        drawExample();
+    </script>
+</body>
+</html>

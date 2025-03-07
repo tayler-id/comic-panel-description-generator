@@ -39,6 +39,28 @@
 - **JavaScript**: Minimal client-side functionality
 - **Bootstrap** (optional): Basic styling if time permits
 
+## Text Generation Strategy
+
+### Dual Approach Implementation
+- **Grok API (Primary)**: Used when API key is available, provides higher quality comic-style descriptions
+- **GPT-2 (Fallback)**: Local model used when Grok API is unavailable, optimized for comic descriptions
+
+### Prompt Engineering
+- **Enhanced Prompts**: Added comic-specific context to prompts ("comic style, short and wild!" for Grok, "comic book action!" for GPT-2)
+- **Dynamic Prompting**: Different prompt styles based on the text generation method
+- **Context Inclusion**: Incorporating figure count, motion type, and special objects into prompts
+
+### Output Optimization
+- **Concise Descriptions**: Reduced max token length from 50 to 30 for more focused descriptions
+- **Artifact Removal**: Cleaning file paths and other unwanted artifacts from GPT-2 output
+- **Parameter Tuning**: Added top_k=40 to GPT-2 generation to reduce unusual outputs
+- **Consistent Formatting**: Ensuring all descriptions follow "Panel X: [description]" format
+
+### Error Handling
+- **Graceful Fallback**: Automatic fallback to GPT-2 if Grok API fails
+- **Logging**: Comprehensive logging of generation process and errors
+- **Default Values**: Providing sensible defaults when generation fails
+
 ## Development Setup
 
 ### Prerequisites

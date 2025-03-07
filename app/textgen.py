@@ -47,7 +47,7 @@ def generate_with_grok(prompt):
         
         data = {
             "prompt": prompt,
-            "max_tokens": 50,
+            "max_tokens": 30,  # Reduced for more concise descriptions
             "temperature": 0.7
         }
         
@@ -81,10 +81,11 @@ def generate_with_gpt2(prompt):
         
         result = generator(
             prompt,
-            max_length=50,
+            max_length=30,  # Reduced for more concise descriptions
             num_return_sequences=1,
             temperature=0.7,
             top_p=0.9,
+            top_k=40,  # Added to reduce weird outputs
             do_sample=True
         )
         
@@ -96,6 +97,9 @@ def generate_with_gpt2(prompt):
         # Take the first sentence or the whole text if it's short
         if "." in completion:
             completion = completion.split(".")[0] + "."
+        
+        # Clean up unwanted artifacts like file paths
+        completion = completion.replace("C:/", "").replace("\\", "").strip()
         
         logger.info(f"GPT-2 generated: {completion}")
         return completion
@@ -125,7 +129,11 @@ def generate_description(image_data, panel_num):
     motion_text = "an action-packed" if motion == "action" else "a static"
     object_text = " with sparks flying" if objects == "sparks" else ""
     
-    prompt = f"Panel {panel_num}: {figure_text} in {motion_text} scene{object_text}."
+    # Enhanced prompts for better comic-style descriptions
+    if USE_GROK_API:
+        prompt = f"Panel {panel_num}: {figure_text} in {motion_text} scene{object_text}—comic style, short and wild!"
+    else:
+        prompt = f"Panel {panel_num}: {figure_text} in {motion_text} scene{object_text}—comic book action!"
     
     # Generate text using either Grok API or GPT-2
     if USE_GROK_API:
