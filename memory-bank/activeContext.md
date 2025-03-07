@@ -22,6 +22,7 @@ The project is in the final phase of development with a strict 5-hour timeline (
 | 2025-03-07 12:11 AM | Text Generation Optimization | Improved GPT-2 output quality with enhanced prompts and parameters |
 | 2025-03-07 12:30 AM | Render.yaml Configuration | Created and configured render.yaml for deployment |
 | 2025-03-07 7:10 AM | Deployment Fix | Modified textgen.py to pre-load GPT-2 model and increased Gunicorn timeout |
+| 2025-03-07 7:22 AM | Architecture Improvement | Implemented TextGen class with Grok API priority and smaller distilgpt2 model |
 
 ## Next Steps
 
@@ -86,7 +87,8 @@ The project is in the final phase of development with a strict 5-hour timeline (
 ## Current Challenges
 
 1. **Text Generation Quality**
-   - Optimized GPT-2 model to reduce unusual descriptions (e.g., file paths)
+   - Prioritized Grok API for higher quality descriptions
+   - Using smaller distilgpt2 model as fallback to reduce memory usage
    - Enhanced prompts with comic-specific context
    - Need to monitor effectiveness of improvements
 
@@ -96,8 +98,8 @@ The project is in the final phase of development with a strict 5-hour timeline (
    - Consider optimization in future versions
 
 3. **Deployment Process**
-   - Fixed worker timeout issue by pre-loading the GPT-2 model
-   - Increased Gunicorn timeout from 30s to 300s
+   - Implemented API-first approach with smaller model fallback
+   - Reduced Gunicorn timeout from 300s to 60s for faster error detection
    - Environment variables configured in render.yaml
    - Need to verify functionality in production environment
 

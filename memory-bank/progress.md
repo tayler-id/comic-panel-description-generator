@@ -7,9 +7,9 @@
 | Project Documentation | Complete | 100% | Updated for Comic Panel Description Generator |
 | Docker Configuration | Complete | 100% | Docker container built and running successfully |
 | Image Processing | Complete | 100% | OpenCV implementation working as expected |
-| Text Generation | Complete | 100% | GPT-2 model generating descriptions |
+| Text Generation | Complete | 100% | API-first approach with smaller model fallback |
 | Web Interface | Complete | 100% | Flask app with upload and results display |
-| Deployment | In Progress | 85% | Fixed worker timeout issue, redeployment pending |
+| Deployment | In Progress | 95% | Implemented memory-efficient solution, redeployment pending |
 | Marketing | Not Started | 0% | Planned for post-deployment |
 
 ## What Works
@@ -63,6 +63,7 @@ The project is in the final development phase. We have successfully built and te
 | 2025-03-07 12:11 AM | Text Generation Optimization | Improved GPT-2 output quality with enhanced prompts |
 | 2025-03-07 12:30 AM | Render.yaml Configuration | Created and configured render.yaml for deployment |
 | 2025-03-07 7:10 AM | Deployment Fix | Modified application to pre-load GPT-2 model and increased Gunicorn timeout |
+| 2025-03-07 7:22 AM | Architecture Improvement | Implemented TextGen class with Grok API priority and smaller distilgpt2 model |
 
 ### Upcoming Milestones
 
@@ -74,10 +75,10 @@ The project is in the final development phase. We have successfully built and te
 
 ## Known Issues
 
-- **Text Generation Quality**: The GPT-2 model sometimes generates unusual descriptions (e.g., file paths instead of proper descriptions)
+- **Text Generation Quality**: Addressed by prioritizing Grok API and improving GPT-2 output
 - **Image Processing Accuracy**: Comic sketches vary widely in style and quality
 - **Docker Image Size**: The Docker image is quite large (3.43GB) due to ML dependencies
-- **Worker Timeout**: Fixed by pre-loading the model and increasing Gunicorn timeout
+- **Memory Constraints**: Addressed by using API-first approach and smaller distilgpt2 model
 
 ## Blockers
 
